@@ -1,0 +1,142 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Tests A-Frame</title>
+    <meta name="description" content="Test A-to-B" /> 
+    
+    <!--MASTER A-FRAME-->
+    <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
+    <!--FONDO-->
+    <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
+    <!--HACER TEMPLATES-->
+    <!--<script src="https://npmcdn.com/aframe-template-component@3.1.1"></script>-->
+    <!--IMPORTAR DE GOOGLE BLOCKS-->
+    <!--<script src="https://dist.3d.io/3dio-js/1.x.x/3dio.min.js"></script>-->
+    <!--SPEECH RECOGNITION-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/annyang/2.6.0/annyang.min.js"></script>
+    <!-- FÍSICA -->
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v2.1.0/dist/aframe-physics-system.min.js"></script>
+    <!--TELEPORT -->
+    <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script> 
+    <!--SHAKE PARA CUANDO LE PEGAS AL VISOR-->
+    <script src="shake.js"></script>
+
+    
+<!--
+LIBRERIAS DE MOVILIDAD
+-->
+    
+    <!--VARIABLES-->
+    <script src="vars.js"></script>
+    <!--PRESIONA PARA CAMINAR-->
+    <!--<script src="tap-to-walk.js"></script>-->
+    <!--HABLA PARA CAMINAR --> <!--### No funciona con iOS ###-->
+    <!--<script src="talk-to-walk.js"></script>-->
+    <!--SHAKE PARA TELETRANSPORTAR-->
+    <script src="shake-to-teleport.js"></script>
+    <!--CLICK PARA TELETRANSPORTAR-->
+    <script src="tap-to-teleport.js"></script>
+    <!--PRRESIONAR PAD PARA TELETRANSPORTAR-->
+    <script src="vivepad-to-teleport.js"></script>
+    <!--WASD PARA CAMINAR-->
+    <script src="wasd-controls-custom.js"></script>
+    
+    
+    <!--FÍSICA-->
+    <script src="physics-trigger.js"></script>
+    <!--Sonidos del teletransportador-->
+    <script src="teleport-sounds.js"></script>
+    
+    <!--Para que se ponga un avatar-->
+    <script src="avatar-select.js"></script>
+    
+    
+  </head>
+  <body>
+    <a-scene physics="debug: true">
+      
+      
+    <!--CARGO LOS ASSETS ANTES DE QUE APAREZCA LA ESCENA-->
+      <a-assets>
+        <audio id="step1" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(1).mp3?1510268113478"></audio>
+        <audio id="step2" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(2).mp3?1510268113441"></audio>
+        <audio id="step3" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(3).mp3?1510268113411"></audio>
+        <audio id="step4" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(4).mp3?1510268113535"></audio>
+        <audio id="step5" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(5).mp3?1510268113708"></audio>
+        <audio id="teleport" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fteleport.wav?1510696319175"></audio>
+        <audio id="question" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fquestion.wav?1510696319141"></audio>
+        <audio id="no"       src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fno.wav?1510858337093"></audio>
+         <a-asset-item id="vive-obj" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fvr_controller_vive.obj?1510846521253"></a-asset-item>
+         <a-asset-item id="vive-mtl" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fvr_controller_vive.mtl?1510846603411">
+        </a-asset-item>
+        
+        <a-asset-item id="mau" src="/assets/mau.gltf" ></a-asset-item> 
+        <a-asset-item id="jona" src="/assets/jona.gltf" ></a-asset-item> 
+        <a-asset-item id="greg" src="/assets/greg.gltf" ></a-asset-item> 
+        
+        
+     </a-assets>
+      
+      
+      <a-entity id="avatar" gltf-model="#" position="0 0 0"></a-entity>
+      
+      <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>      
+      <!--ENVIRONMENT DEL COMPONENTE DE ENVIRONMENTS-->
+      <a-entity environment="preset: tron; numDressing: 0"></a-entity>
+      
+      <!--UN PLANO PARA QUE PUEDAN COLISIONAR LOS OBJETOS CON EL PISO-->
+      <a-entity class="piso"><a-plane static-body position="0 -.1 0" rotation="-90 0 0" scale="100 100 100" material="color:red"></a-plane></a-entity>
+      
+      <!-- UNA CAJA PARA REVISAR LAS COLISIONES -->
+      <a-box dynamic-body id="cajita" position="3 1 -4" scale="1 1 1"></a-box>
+
+      <!--EL JUGADOR, CON SU CÁMARA Y SUS ENTIDADES DEPENDIENTES (COMO SUS MANOS, ETC)-->
+      <a-entity id="player" tap-to-walk position="0 1.5 0" wasd-controls-custom>
+         <!--Controles de HTC Vive-->
+      <a-entity id="leftHand" vive-controls="hand: left" ></a-entity>
+      <a-entity id="rightHand" vive-controls="hand: right" >
+        <!--Parabola de transportacion en el control de vive-->
+        <a-entity position="0 0 0"
+        pad-listener
+        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints=60 defaultPlaneSize=200">
+        </a-entity>
+      </a-entity>
+        
+        <a-camera id="eyes" position="0 0 0" camera look-controls mouse-cursor wasd-controls="enabled:false">
+          <a-entity id="cursor" cursor="fuse: false;"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.019"
+            material="color: white; shader: flat"
+            raycaster="far: 5; interval: 1000; objects: .clickable">
+          </a-entity>
+          <a-entity id="texto" text="value:Hola;align:center" position="0 -.3 -0.5"></a-entity>
+      
+         <!-- <a-plane position="0 .7 -1" material="transparent: true;  opacity: 0.5; color: #ffec04; shader:flat;"  scale="1 0.2 1"></a-plane>-->
+        <a-entity position=".2 -.1 0"
+        shake-listener
+        click-listener
+        teleport-controls=
+                  "cameraRig: #player;
+                   teleportOrigin: #eye;
+                   startEvents:shakestart,clickstart,paddown;
+                   endEvents:shakeend,clickend,padup;
+                   collisionEntities: .piso;
+                   curveShootingSpeed:15;
+                   hitCylinderRadius:1;"
+        >
+        </a-entity>
+        </a-camera>
+        
+        <a-entity id="step" sound="src: #step1"></a-entity>
+        <a-entity id="question_sfx" sound="src: #question"></a-entity>
+        <a-entity id="teleport_sfx" sound="src: #teleport"></a-entity>
+        <a-entity id="no_sfx" sound="src: #no"></a-entity>
+      </a-entity>
+
+      <a-entity light="type: ambient; color: #FFF; intensity: 0.2" position="-1 1 0"></a-entity>
+      
+     
+      
+    </a-scene>
+  </body>
+</html>
