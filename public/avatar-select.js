@@ -1,12 +1,3 @@
-AFRAME.registerComponent('random-avatar', {
-   init: function () {
-      var avatar = this.el;
-     avatar.setAttribute("gltf-model", "#"+avatar);
-  }
-});
-
-avatarName = getModel(Math.random()*3);
-
 function getModel(n){
     var nr = Math.ceil(n);
     var str = "";
@@ -25,3 +16,13 @@ function getModel(n){
     
   return str;
 }
+
+var avatarName = getModel(Math.random()*3);
+
+AFRAME.registerComponent('random-avatar', {
+   init: function () {
+     console.log(avatarName);
+      var avatar = this.el;
+     avatar.setAttribute("gltf-model", "#"+avatarName);
+   }
+});

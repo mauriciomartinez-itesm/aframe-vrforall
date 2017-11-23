@@ -4,7 +4,7 @@ AFRAME.registerComponent('click-listener', {
     var count = 0
     
     // you could also initialize the shake instance here
-    window.addEventListener('click', function () {
+    document.querySelector('a-scene').addEventListener('click', function () {
       if (++count % 2) {
         targetEl.emit('clickstart')
       } else {
