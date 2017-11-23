@@ -14,6 +14,7 @@ var w = false;
 var a = false;
 var s = false;
 var d = false;
-var mix = 0;
-var miz = 0;
+
+var avatarName = "";
+
 

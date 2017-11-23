@@ -1,10 +1,13 @@
-window.onload = function() {
-  
-  var avatar = document.querySelector("#avatar");
+AFRAME.registerComponent('random-avatar', {
+   init: function () {
+      var avatar = this.el;
+     avatar.setAttribute("gltf-model", "#"+avatar);
+  }
+});
 
-  avatar.setAttribute("gltf-model", "#"+getModel(Math.random()*3));
+avatarName = getModel(Math.random()*3);
 
-  function getModel(n){
+function getModel(n){
     var nr = Math.ceil(n);
     var str = "";
     
@@ -21,6 +24,4 @@ window.onload = function() {
     }
     
   return str;
-    
-  }
-};
+}
