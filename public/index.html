@@ -9,6 +9,9 @@
     <!--FONDO-->
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
     <!--HACER TEMPLATES-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="https://unpkg.com/networked-aframe@^0.4.0/dist/networked-aframe.min.js"></script>
+    <script src="easyrtc/easyrtc.js"></script>
     <!--<script src="https://npmcdn.com/aframe-template-component@3.1.1"></script>-->
     <!--IMPORTAR DE GOOGLE BLOCKS-->
     <!--<script src="https://dist.3d.io/3dio-js/1.x.x/3dio.min.js"></script>-->
@@ -20,7 +23,6 @@
     <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script> 
     <!--SHAKE PARA CUANDO LE PEGAS AL VISOR-->
     <script src="shake.js"></script>
-
     
 <!--
 LIBRERIAS DE MOVILIDAD
@@ -51,9 +53,36 @@ LIBRERIAS DE MOVILIDAD
     <script src="avatar-select.js"></script>
     
     
+    <script>
+      // Define custom schema for syncing avatar color, set by random-color
+      var avatarSchema = {
+        template: '#avatar-template',
+        components: [
+          'rotation',
+          'position',
+          {
+            selector: '.avatar',
+            component: 'gltf-model'
+          }
+        ]
+      };
+      
+      var playerSchema = {
+        template: '#player-template',
+        components: [
+          'position'
+        ]
+      };
+      
+      NAF.schemas.add(avatarSchema);
+    </script>
+    
   </head>
   <body>
-    <a-scene physics="debug: true">
+    <a-scene physics="debug: true" networked-scene="
+      room: basic;
+      debug: true;
+    ">
       
       
     <!--CARGO LOS ASSETS ANTES DE QUE APAREZCA LA ESCENA-->
@@ -75,10 +104,17 @@ LIBRERIAS DE MOVILIDAD
         <a-asset-item id="greg" src="/assets/greg.gltf" ></a-asset-item> 
         
         
+        <!-- Avatar -->
+        <script id="avatar-template" type="text/html">
+          <a-entity class="avatar" gltf-model random-avatar position="0 0 0"></a-entity>
+        </script>
+          <script id="player-template" type="text/html">
+          <a-entity />
+        </script>
+        
+        
      </a-assets>
       
-      
-      <a-entity id="avatar" gltf-model="#" position="0 0 0"></a-entity>
       
       <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>      
       <!--ENVIRONMENT DEL COMPONENTE DE ENVIRONMENTS-->
@@ -91,7 +127,7 @@ LIBRERIAS DE MOVILIDAD
       <a-box dynamic-body id="cajita" position="3 1 -4" scale="1 1 1"></a-box>
 
       <!--EL JUGADOR, CON SU CÁMARA Y SUS ENTIDADES DEPENDIENTES (COMO SUS MANOS, ETC)-->
-      <a-entity id="player" tap-to-walk position="0 1.5 0" wasd-controls-custom>
+      <a-entity id="player" networked="template:#player-template;" tap-to-walk position="0 1.5 0" wasd-controls-custom>
          <!--Controles de HTC Vive-->
       <a-entity id="leftHand" vive-controls="hand: left" ></a-entity>
       <a-entity id="rightHand" vive-controls="hand: right" >
@@ -102,7 +138,7 @@ LIBRERIAS DE MOVILIDAD
         </a-entity>
       </a-entity>
         
-        <a-camera id="eyes" position="0 0 0" camera look-controls mouse-cursor wasd-controls="enabled:false">
+        <a-camera id="eyes" networked="template:#avatar-template;showLocalTemplate:false;" position="0 0 0" camera look-controls mouse-cursor wasd-controls="enabled:false">
           <a-entity id="cursor" cursor="fuse: false;"
             position="0 0 -1"
             geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.019"

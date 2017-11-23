@@ -19,8 +19,6 @@ AFRAME.registerComponent('tap-to-walk', {
 		  	if(downer){
           
           //DECLARO MIS VARIABLES (QUE INCLUYEN LA ENTIDAD DE CÁMARA, POSICIONES EN X,Y,Z Y ROTACIÓN EN Y)
-          var camara = document.querySelector('#eyes');
-          var player = document.querySelector('#player');
           var px =player.getAttribute("position").x;
           var py =player.getAttribute("position").y;
           var pz =player.getAttribute("position").z;

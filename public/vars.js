@@ -10,5 +10,11 @@ var listening = false;
 //SI SE LE HA DADO LA INSTRUCCIÓN DE DETENERSE AL JUGADOR
 var alto = false;
 //VARIABLES DE WASD
-var w,a,s,d = false;
+var w = false;
+var a = false;
+var s = false;
+var d = false;
+
+var avatarName = "";
+
 
