@@ -39,7 +39,9 @@ LIBRERIAS DE MOVILIDAD
     <!--CLICK PARA TELETRANSPORTAR-->
     <script src="tap-to-teleport.js"></script>
     <!--PRRESIONAR PAD PARA TELETRANSPORTAR-->
-    <script src="vivepad-to-teleport.js"></script>
+    <script src="pad-to-teleport.js"></script>
+    <!--DAYDREAM PAD PARA TELETRANSPORTAR-->
+    <script src="dreampad-to-teleport.js"></script>
     <!--WASD PARA CAMINAR-->
     <script src="wasd-controls-custom.js"></script>
     
@@ -81,24 +83,35 @@ LIBRERIAS DE MOVILIDAD
   <body>
     <a-scene physics="debug: true" networked-scene="
       room: basic;
-      debug: true;
-    ">
+      debug: true;">
       
       
     <!--CARGO LOS ASSETS ANTES DE QUE APAREZCA LA ESCENA-->
       <a-assets>
-        <audio id="step1" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(1).mp3?1510268113478"></audio>
-        <audio id="step2" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(2).mp3?1510268113441"></audio>
-        <audio id="step3" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(3).mp3?1510268113411"></audio>
-        <audio id="step4" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(4).mp3?1510268113535"></audio>
-        <audio id="step5" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fstep%20(5).mp3?1510268113708"></audio>
-        <audio id="teleport" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fteleport.wav?1510696319175"></audio>
-        <audio id="question" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fquestion.wav?1510696319141"></audio>
-        <audio id="no"       src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fno.wav?1510858337093"></audio>
-         <a-asset-item id="vive-obj" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fvr_controller_vive.obj?1510846521253"></a-asset-item>
-         <a-asset-item id="vive-mtl" src="https://cdn.glitch.com/27c8bb5e-9d46-4575-aecc-c37b45b60aa2%2Fvr_controller_vive.mtl?1510846603411">
-        </a-asset-item>
+        <audio id="step1" src="assets/step (1).mp3"></audio>
+        <audio id="step2" src="assets/step (2).mp3"></audio>
+        <audio id="step3" src="assets/step (3).mp3"></audio>
+        <audio id="step4" src="assets/step (4).mp3"></audio>
+        <audio id="step5" src="assets/step (5).mp3"></audio>
+        <audio id="teleport" src="assets/teleport.wav"></audio>
+        <audio id="question" src="assets/question.wav"></audio>
+        <audio id="no"       src="assets/no.wav"></audio>
         
+        <a-asset-item id="vive-obj" src="assets/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="vive-mtl" src="assets/vr_controller_vive.mtl"></a-asset-item>
+
+        <a-asset-item id="daydream-obj" src="assets/vr_controller_daydream.obj"></a-asset-item>
+        <a-asset-item id="daydream-mtl" src="assets/vr_controller_daydream.mtl"></a-asset-item>
+        
+        <a-asset-item id="gearvr-obj" src="assets/gear_vr_controller.obj"></a-asset-item>
+        <a-asset-item id="gearvr-mtl" src="assets/gear_vr_controller.mtl"></a-asset-item>
+
+        <a-asset-item id="oculus-left-obj" src="assets/oculus-touch-controller-left.obj"></a-asset-item>
+        <a-asset-item id="oculus-left-mtl" src="assets/oculus-touch-controller-left.mtl"></a-asset-item>
+
+        <a-asset-item id="oculus-right-obj" src="assets/oculus-touch-controller-right.obj"></a-asset-item>
+        <a-asset-item id="oculus-right-mtl" src="assets/oculus-touch-controller-right.mtl"></a-asset-item>
+
         <a-asset-item id="mau" src="/assets/mau.gltf" ></a-asset-item> 
         <a-asset-item id="jona" src="/assets/jona.gltf" ></a-asset-item> 
         <a-asset-item id="greg" src="/assets/greg.gltf" ></a-asset-item> 
@@ -106,8 +119,9 @@ LIBRERIAS DE MOVILIDAD
         
         <!-- Avatar -->
         <script id="avatar-template" type="text/html">
-          <a-entity class="avatar" gltf-model random-avatar position="0 0 0"></a-entity>
+          <a-entity class="avatar" random-avatar gltf-model position="0 0 0"></a-entity>
         </script>
+        
           <script id="player-template" type="text/html">
           <a-entity />
         </script>
@@ -115,8 +129,12 @@ LIBRERIAS DE MOVILIDAD
         
      </a-assets>
       
-      
-      <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>      
+      <!--OBJETOS CONTROLES -->
+      <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>  
+      <a-entity obj-model="daydream-controls: #daydream-obj; mtl: #daydream-mtl"></a-entity>  
+      <a-entity obj-model="oculus-left-controls: #oculus-left-obj; mtl: #oculus-left-mtl"></a-entity>  
+      <a-entity obj-model="oculus-right-controls: #oculus-right-obj; mtl: #oculus-right-mtl"></a-entity>  
+      <a-entity obj-model="gearvr-controls: #gearvr-obj; mtl: #gearvr-mtl"></a-entity>  
       <!--ENVIRONMENT DEL COMPONENTE DE ENVIRONMENTS-->
       <a-entity environment="preset: tron; numDressing: 0"></a-entity>
       
@@ -129,6 +147,14 @@ LIBRERIAS DE MOVILIDAD
       <!--EL JUGADOR, CON SU CÁMARA Y SUS ENTIDADES DEPENDIENTES (COMO SUS MANOS, ETC)-->
       <a-entity id="player" networked="template:#player-template;" tap-to-walk position="0 1.5 0" wasd-controls-custom>
          <!--Controles de HTC Vive-->
+        
+        <!-- CONTROL CON DAYDREAM DE GOOGLE (En el teléfono se tiene que bajar chrome beta y en chrome://flags habilitar webvr)-->
+      <a-entity daydream-controls
+        teleport-controls="cameraRig: #player"></a-entity>
+        <!-- Aún no se ha podido probar -->
+      <a-entity gearvr-controls
+        teleport-controls="cameraRig: #player"></a-entity>
+        
       <a-entity id="leftHand" vive-controls="hand: left" ></a-entity>
       <a-entity id="rightHand" vive-controls="hand: right" >
         <!--Parabola de transportacion en el control de vive-->
