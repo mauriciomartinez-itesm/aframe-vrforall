@@ -24,6 +24,7 @@
     <!--SHAKE PARA CUANDO LE PEGAS AL VISOR-->
     <script src="shake.js"></script>
     
+    
 <!--
 LIBRERIAS DE MOVILIDAD
 -->
@@ -41,7 +42,7 @@ LIBRERIAS DE MOVILIDAD
     <!--PRRESIONAR PAD PARA TELETRANSPORTAR-->
     <script src="pad-to-teleport.js"></script>
     <!--DAYDREAM PAD PARA TELETRANSPORTAR-->
-    <script src="dreampad-to-teleport.js"></script>
+    <script src="ax-to-teleport.js"></script>
     <!--WASD PARA CAMINAR-->
     <script src="wasd-controls-custom.js"></script>
     
@@ -56,7 +57,7 @@ LIBRERIAS DE MOVILIDAD
     
     
     <script>
-      // Define custom schema for syncing avatar color, set by random-color
+      // ESTAS MADRES NO SIRVEN PA NADA
       var avatarSchema = {
         template: '#avatar-template',
         components: [
@@ -76,14 +77,27 @@ LIBRERIAS DE MOVILIDAD
         ]
       };
       
+      var cubeSchema = {
+        template: '#cube-template',
+        components: [
+          'rotation',
+          'position'
+          ]
+      }
+      
       NAF.schemas.add(avatarSchema);
+      NAF.schemas.add(playerSchema);
+      NAF.schemas.add(cubeSchema);
+      
     </script>
     
   </head>
   <body>
     <a-scene physics="debug: true" networked-scene="
       room: basic;
-      debug: true;">
+      debug: true;
+      audio: true;
+      adapter: easyrtc;">
       
       
     <!--CARGO LOS ASSETS ANTES DE QUE APAREZCA LA ESCENA-->
@@ -117,13 +131,18 @@ LIBRERIAS DE MOVILIDAD
         <a-asset-item id="greg" src="/assets/greg.gltf" ></a-asset-item> 
         
         
+        
         <!-- Avatar -->
         <script id="avatar-template" type="text/html">
           <a-entity class="avatar" random-avatar gltf-model position="0 0 0"></a-entity>
         </script>
         
           <script id="player-template" type="text/html">
-          <a-entity />
+          <a-entity></a-entity>
+        </script>
+        
+         <script id="cube-template" type="text/html">
+          <a-box dynamic-body class="cajita" scale="1 1 1" position="0 1 -4"></a-box>
         </script>
         
         
@@ -132,9 +151,9 @@ LIBRERIAS DE MOVILIDAD
       <!--OBJETOS CONTROLES -->
       <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>  
       <a-entity obj-model="daydream-controls: #daydream-obj; mtl: #daydream-mtl"></a-entity>  
+      <a-entity obj-model="gearvr-controls: #gearvr-obj; mtl: #gearvr-mtl"></a-entity>  
       <a-entity obj-model="oculus-left-controls: #oculus-left-obj; mtl: #oculus-left-mtl"></a-entity>  
       <a-entity obj-model="oculus-right-controls: #oculus-right-obj; mtl: #oculus-right-mtl"></a-entity>  
-      <a-entity obj-model="gearvr-controls: #gearvr-obj; mtl: #gearvr-mtl"></a-entity>  
       <!--ENVIRONMENT DEL COMPONENTE DE ENVIRONMENTS-->
       <a-entity environment="preset: tron; numDressing: 0"></a-entity>
       
@@ -142,12 +161,12 @@ LIBRERIAS DE MOVILIDAD
       <a-entity class="piso"><a-plane static-body position="0 -.1 0" rotation="-90 0 0" scale="100 100 100" material="color:red"></a-plane></a-entity>
       
       <!-- UNA CAJA PARA REVISAR LAS COLISIONES -->
-      <a-box dynamic-body id="cajita" position="3 1 -4" scale="1 1 1"></a-box>
+      <a-entity networked="template:#cube-template;"><a-entity></a-entity></a-entity>
 
       <!--EL JUGADOR, CON SU CÁMARA Y SUS ENTIDADES DEPENDIENTES (COMO SUS MANOS, ETC)-->
       <a-entity id="player" networked="template:#player-template;" tap-to-walk position="0 1.5 0" wasd-controls-custom>
          <!--Controles de HTC Vive-->
-        
+        <a-box static-body position="0 -1 0" scale="1 1 1"></a-box>
         <!-- CONTROL CON DAYDREAM DE GOOGLE (En el teléfono se tiene que bajar chrome beta y en chrome://flags habilitar webvr)-->
       <a-entity daydream-controls
         teleport-controls="cameraRig: #player"></a-entity>
@@ -160,13 +179,27 @@ LIBRERIAS DE MOVILIDAD
         <!--Parabola de transportacion en el control de vive-->
         <a-entity position="0 0 0"
         pad-listener
-        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints=60 defaultPlaneSize=200">
+        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize=:200">
         </a-entity>
       </a-entity>
         
-        <a-camera id="eyes" networked="template:#avatar-template;showLocalTemplate:false;" position="0 0 0" camera look-controls mouse-cursor wasd-controls="enabled:false">
+      <a-entity oculus-touch-controls="hand: left" >
+      <!--Parabola de transportacion en el control de oculus-->
+        <a-entity position="0 0 0"
+        ax-listener
+        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize:200">
+        </a-entity>  
+      </a-entity>
+      <a-entity  oculus-touch-controls="hand: right" >
+        <!--Parabola de transportacion en el control de oculus-->
+        <a-entity position="0 0 0"
+        ax-listener
+        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize:200">
+        </a-entity>
+      </a-entity>
+        
+        <a-camera id="eyes" networked="template:#avatar-template;showLocalTemplate:false;" position="0 0 0" camera="userHeight:1.6" look-controls mouse-cursor wasd-controls="enabled:false">
           <a-entity id="cursor" cursor="fuse: false;"
-            position="0 0 -1"
             geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.019"
             material="color: white; shader: flat"
             raycaster="far: 5; interval: 1000; objects: .clickable">
@@ -176,12 +209,12 @@ LIBRERIAS DE MOVILIDAD
          <!-- <a-plane position="0 .7 -1" material="transparent: true;  opacity: 0.5; color: #ffec04; shader:flat;"  scale="1 0.2 1"></a-plane>-->
         <a-entity position=".2 -.1 0"
         shake-listener
-        click-listener
+       click-listener
         teleport-controls=
                   "cameraRig: #player;
                    teleportOrigin: #eye;
                    startEvents:shakestart,clickstart,paddown;
-                   endEvents:shakeend,clickend,padup;
+                   endEvents:shakeend,clickend;
                    collisionEntities: .piso;
                    curveShootingSpeed:15;
                    hitCylinderRadius:1;"
