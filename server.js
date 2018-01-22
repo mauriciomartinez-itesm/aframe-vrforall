@@ -5,7 +5,7 @@
 var http    = require('http');              // http server core module
 var express = require('express');           // web framework external module
 var serveStatic = require('serve-static');  // serve static files
-var socketIo = require('socket.io');        // web socket external module
+var socketIo = require('socket.io')();        // web socket external module
 var easyrtc = require('easyrtc');           // EasyRTC external module
 var assets = require('./assets');
 
@@ -20,6 +20,17 @@ var app = express();
 app.use(express.static('public'));
 
 app.use('/assets', assets);
+
+socketIo.on('connection', function(socket){
+  
+  socket.on('movement', function(newpos){
+    console.log(newpos);
+    socket.broadcast.emit('new movement', newpos);
+  });
+  
+});
+
+
 
 // Start Express http server
 var webServer = http.createServer(app).listen(port);
@@ -72,6 +83,9 @@ easyrtc.events.on('roomJoin', function(connectionObj, roomName, roomParameter, c
 // Start EasyRTC server
 var rtc = easyrtc.listen(app, socketServer, null, function(err, rtcRef) {
     console.log('Initiated');
+  
+    
+    
 
     rtcRef.events.on('roomCreate', function(appObj, creatorConnectionObj, roomName, roomOptions, callback) {
         console.log('roomCreate fired! Trying to create: ' + roomName);
@@ -79,6 +93,8 @@ var rtc = easyrtc.listen(app, socketServer, null, function(err, rtcRef) {
         appObj.events.defaultListeners.roomCreate(appObj, creatorConnectionObj, roomName, roomOptions, callback);
     });
 });
+
+
 
 //listen on port
 webServer.listen(port, function () {

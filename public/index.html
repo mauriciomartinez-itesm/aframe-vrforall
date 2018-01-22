@@ -4,12 +4,49 @@
     <title>Tests A-Frame</title>
     <meta name="description" content="Test A-to-B" /> 
     
+    
     <!--MASTER A-FRAME-->
     <script src="https://aframe.io/releases/0.7.0/aframe.min.js"></script>
     <!--FONDO-->
     <script src="https://unpkg.com/aframe-environment-component/dist/aframe-environment-component.min.js"></script>
     <!--HACER TEMPLATES-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+     <script src="https://cdn.rawgit.com/donmccurdy/aframe-extras/v3.13.1/dist/aframe-extras.js"></script>
+    
+    <script type="text/javascript">
+      
+      
+      
+      
+      
+      
+      
+      function moverCajita(pos){
+      var el = document.querySelector('#cajita');
+          el.removeAttribute('dynamic-body');
+          el.setAttribute('static-body','');
+          el.setAttribute('position', pos);
+          el.removeAttribute('static-body');
+          el.setAttribute('dynamic-body','');
+          socket.emit('movement', el.getAttribute('position'));
+      }
+      
+      
+        var socket = io();
+        /*setTimeout(function(){
+          socket.emit('movement', el.getAttribute('position'));
+        },5000);*/
+
+        socket.on('new movement', function(pos){
+      var el = document.querySelector('#cajita');
+          el.removeAttribute('dynamic-body');
+          el.setAttribute('static-body','');
+          el.setAttribute('position', pos);
+          el.removeAttribute('static-body');
+          el.setAttribute('dynamic-body','');
+          document.querySelector('a-scene').flushToDOM(true);
+        });
+      </script>
     <script src="https://unpkg.com/networked-aframe@^0.4.0/dist/networked-aframe.min.js"></script>
     <script src="easyrtc/easyrtc.js"></script>
     <!--<script src="https://npmcdn.com/aframe-template-component@3.1.1"></script>-->
@@ -23,6 +60,7 @@
     <script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script> 
     <!--SHAKE PARA CUANDO LE PEGAS AL VISOR-->
     <script src="shake.js"></script>
+    
     
     
 <!--
@@ -56,6 +94,7 @@ LIBRERIAS DE MOVILIDAD
     <script src="avatar-select.js"></script>
     
     
+    
     <script>
       // ESTAS MADRES NO SIRVEN PA NADA
       var avatarSchema = {
@@ -85,19 +124,28 @@ LIBRERIAS DE MOVILIDAD
           ]
       }
       
+      var handSchema = {
+        template: '#left_hand-template',
+        components: [
+          'rotation',
+          'position'
+          ]
+      }
+      
       NAF.schemas.add(avatarSchema);
       NAF.schemas.add(playerSchema);
       NAF.schemas.add(cubeSchema);
+      NAF.schemas.add(handSchema);
       
     </script>
     
   </head>
   <body>
-    <a-scene physics="debug: true" networked-scene="
+    <a-scene physics="debug: false" networked-scene="
       room: basic;
+      adapter: easyrtc;
       debug: true;
-      audio: true;
-      adapter: easyrtc;">
+      audio: true;">
       
       
     <!--CARGO LOS ASSETS ANTES DE QUE APAREZCA LA ESCENA-->
@@ -130,11 +178,12 @@ LIBRERIAS DE MOVILIDAD
         <a-asset-item id="jona" src="/assets/jona.gltf" ></a-asset-item> 
         <a-asset-item id="greg" src="/assets/greg.gltf" ></a-asset-item> 
         
+        <a-asset-item id="bot" src="/assets/bot4.json" ></a-asset-item> 
         
         
         <!-- Avatar -->
         <script id="avatar-template" type="text/html">
-          <a-entity class="avatar" random-avatar gltf-model position="0 0 0"></a-entity>
+          <a-entity class="avatar" networked-audio-source random-avatar gltf-model position="0 0 0"></a-entity>
         </script>
         
           <script id="player-template" type="text/html">
@@ -142,11 +191,17 @@ LIBRERIAS DE MOVILIDAD
         </script>
         
          <script id="cube-template" type="text/html">
-          <a-box dynamic-body class="cajita" scale="1 1 1" position="0 1 -4"></a-box>
+          <a-box class="cajita" scale="1 1 1" position="0 0 0"></a-box>
+        </script>
+        
+         <script id="left_hand-template" type="text/html">
+          <a-box static-body class="left_hand_class" position="0 0 0" scale="0.1 0.1 0.1"></a-box>
         </script>
         
         
      </a-assets>
+      
+      <a-entity json-model="src: #bot" animation-mixer="clip: run" position= "0 0 1" scale="2 2 2"></a-entity>
       
       <!--OBJETOS CONTROLES -->
       <a-entity obj-model="vive-controls: #vive-obj; mtl: #vive-mtl"></a-entity>  
@@ -161,12 +216,20 @@ LIBRERIAS DE MOVILIDAD
       <a-entity class="piso"><a-plane static-body position="0 -.1 0" rotation="-90 0 0" scale="100 100 100" material="color:red"></a-plane></a-entity>
       
       <!-- UNA CAJA PARA REVISAR LAS COLISIONES -->
-      <a-entity networked="template:#cube-template;"><a-entity></a-entity></a-entity>
+      <!--<a-entity id="inobj" position="0 4 -4">
+          <a-box dynamic-body class="cajita" scale="1 1 1" position="0 0 0"></a-box></a-entity>-->
+      <a-sphere dynamic-body singleton="position:false" scale=".5 2 .5" position="4 4 1" material="color: #F00;"></a-sphere>
+      
+      <a-box dynamic-body singleton="position:false;rotation:false" scale=".5 2 .5" position="2 2 -5" material="color: #F00;"></a-box>
 
       <!--EL JUGADOR, CON SU CÁMARA Y SUS ENTIDADES DEPENDIENTES (COMO SUS MANOS, ETC)-->
       <a-entity id="player" networked="template:#player-template;" tap-to-walk position="0 1.5 0" wasd-controls-custom>
          <!--Controles de HTC Vive-->
-        <a-box static-body position="0 -1 0" scale="1 1 1"></a-box>
+      <!--<a-box id="pies" static-body position="0 -1 0" scale="1 1 1"></a-box>-->
+        
+        <a-entity id="static_left_hand" networked="template:#left_hand-template;showLocalTemplate:true;" position="-0.4 1 0" ></a-entity>
+      <a-entity id="static_right_hand" networked="template:#left_hand-template;showLocalTemplate:true;" position="0.4 1 0" ></a-entity>
+      
         <!-- CONTROL CON DAYDREAM DE GOOGLE (En el teléfono se tiene que bajar chrome beta y en chrome://flags habilitar webvr)-->
       <a-entity daydream-controls
         teleport-controls="cameraRig: #player"></a-entity>
@@ -174,30 +237,17 @@ LIBRERIAS DE MOVILIDAD
       <a-entity gearvr-controls
         teleport-controls="cameraRig: #player"></a-entity>
         
-      <a-entity id="leftHand" vive-controls="hand: left" ></a-entity>
-      <a-entity id="rightHand" vive-controls="hand: right" >
+      <a-entity id="dynamic_left_hand" vive-controls="hand: left" oculus-touch-controls="hand: left" networked="template:#left_hand-template;showLocalTemplate:true;" ></a-entity>
+      <a-entity id="dynamic_right_hand" vive-controls="hand: right" oculus-touch-controls="hand: right" networked="template:#left_hand-template;showLocalTemplate:true;" >
         <!--Parabola de transportacion en el control de vive-->
         <a-entity position="0 0 0"
         pad-listener
+        ax-listener
         teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize=:200">
         </a-entity>
       </a-entity>
         
-      <a-entity oculus-touch-controls="hand: left" >
-      <!--Parabola de transportacion en el control de oculus-->
-        <a-entity position="0 0 0"
-        ax-listener
-        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize:200">
-        </a-entity>  
-      </a-entity>
-      <a-entity  oculus-touch-controls="hand: right" >
-        <!--Parabola de transportacion en el control de oculus-->
-        <a-entity position="0 0 0"
-        ax-listener
-        teleport-controls="cameraRig: #player; teleportOrigin: #eye; startEvents:paddown; endEvents:padup ;collisionEntities: .piso; curveShootingSpeed:20; hitCylinderRadius:1;curveNumberPoints:60; defaultPlaneSize:200">
-        </a-entity>
-      </a-entity>
-        
+      
         <a-camera id="eyes" networked="template:#avatar-template;showLocalTemplate:false;" position="0 0 0" camera="userHeight:1.6" look-controls mouse-cursor wasd-controls="enabled:false">
           <a-entity id="cursor" cursor="fuse: false;"
             geometry="primitive: ring; radiusInner: 0.015; radiusOuter: 0.019"
@@ -207,13 +257,13 @@ LIBRERIAS DE MOVILIDAD
           <a-entity id="texto" text="value:Hola;align:center" position="0 -.3 -0.5"></a-entity>
       
          <!-- <a-plane position="0 .7 -1" material="transparent: true;  opacity: 0.5; color: #ffec04; shader:flat;"  scale="1 0.2 1"></a-plane>-->
-        <a-entity position=".2 -.1 0"
+        <a-entity id="teleporter-mobile" position=".2 -.1 0"
         shake-listener
        click-listener
         teleport-controls=
                   "cameraRig: #player;
                    teleportOrigin: #eye;
-                   startEvents:shakestart,clickstart,paddown;
+                   startEvents:shakestart,clickstart;
                    endEvents:shakeend,clickend;
                    collisionEntities: .piso;
                    curveShootingSpeed:15;
@@ -229,9 +279,44 @@ LIBRERIAS DE MOVILIDAD
       </a-entity>
 
       <a-entity light="type: ambient; color: #FFF; intensity: 0.2" position="-1 1 0"></a-entity>
-      
-     
-      
     </a-scene>
+    
+     <script>
+      console.log('hola jona');
+      sglElts = [];
+      sglElts = document.querySelectorAll('[singleton]');
+      if(sglElts.length>=1){
+        for(i=0;i<sglElts.length;i++){
+          sglElAtt = sglElts[i].getAttribute('singleton').split(';');
+          if(sglElAtt.length>=1){
+            for(j=0;j<sglElAtt.length;j++){
+              console.log(sglElAtt[j].split(':')[0]);
+              switch(sglElAtt[j].split(':')[0]){
+                case 'position':
+                  console.log('aqui jones');
+                  console.log(sglElAtt[j].split(':')[1]);
+                  if(sglElAtt[j].split(':')[1] == 'true'){
+                    console.log('hola si probando');
+                    sock.emit('new position');
+                  }
+                  break;
+                case 'rotation':
+                  if(sglElAtt[j].split(':')[1] == 'true'){
+                    sock.emit('new rotation');
+                  } 
+                  break;
+                default:
+                     
+              }
+            }
+          }
+        } 
+      }
+      
+       
+    </script>
+    
+    <!--Para revisar desde donde se está conectando-->
+    <script src="check-device.js"></script>
   </body>
 </html>
